@@ -6,9 +6,6 @@ int main()
 {
     const float lateral = 1000;
     const float high = 750;
-    
-
-    Vector2 mouse = GetMousePosition();
 
     InitWindow ( lateral, high, "testt file");
     SetTargetFPS(30);
@@ -18,21 +15,60 @@ int main()
 
     float xmenu = 600;
     float ymenu = 75;
+
     Rectangle menu = { centerX - xmenu /2, centerY - ymenu /2, xmenu, ymenu };
+    Rectangle ExitofGame = { 0, 0, 100, 100 };
+
+    Color menucolor = RED;
+
+    int Schermata = 0;
     
     while ( !WindowShouldClose() )
     {
+        bool PressedExit = true;
 
-        if ( IsMouseButtonPressed(MOUSE_LEFT_BUTTON) ) 
+        Vector2 mouse = GetMousePosition();
+
+        bool Checkifontheblook = CheckCollisionPointRec ( mouse, menu );
+
+        if ( IsMouseButtonPressed ( MOUSE_LEFT_BUTTON ))
         {
-            cout << "Mouse position: " << mouse.x << ", " << mouse.y << endl;
+            if ( Schermata == 0 && CheckCollisionPointRec ( mouse, menu ))
+            {
+                Schermata = 1;
+            }
+            
+            if ( Schermata == 1 && CheckCollisionPointRec ( mouse, ExitofGame))
+            {
+                Schermata = 0;
+            }
         }
+        
+        if ( Checkifontheblook )
+        {
+            menucolor = GRAY;
+        }
+        else 
+        {
+            menucolor = RED;
+        }
+
         BeginDrawing();
 
-        DrawRectangleRec( menu, RED);
-        ClearBackground(BLACK);
-        DrawText ("NOME DEL GIOCO", centerX - xmenu /2, 100, 50, WHITE );
-        DrawText ("START", centerX - xmenu /2, centerY - ymenu /2 + 15, 50, WHITE );
+        if ( Schermata == 0 )
+        {
+            DrawRectangleRec( menu, menucolor );
+            ClearBackground( BLACK );
+            DrawText ("NOME DEL GIOCO", centerX - xmenu /2, 100, 50, WHITE );
+            DrawText ("START", centerX - xmenu /2, centerY - ymenu /2 + 15, 50, WHITE );
+        } 
+
+        else if ( Schermata == 1 )
+        {
+            ClearBackground ( BLACK );
+            DrawRectangleRec ( ExitofGame, RED );
+        }
+
         EndDrawing();
     }
 
