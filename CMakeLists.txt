@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD 17)
 find_package(raylib REQUIRED)
 
 #crea il gioco questo
-add_executable(initialgame initialtest.cpp)
+add_executable(initialgame main.cpp)
 
 #collega il raylib al eseguibile
 target_link_libraries(initialgame raylib)

@@ -2,13 +2,113 @@
 #include <ctime>
 #include <iostream> 
 
+struct The_Protagonist {
+
+    float ProtSizex, ProtSizey;
+    float ProtPositionx;
+    float ProtPositiony;
+    int jump = 0;
+    float xvelocity;
+    float deltaT = 0;
+
+    void Update () {
+  
+    
+
+    if ( IsKeyDown ( KEY_A )|| IsKeyPressed ( KEY_RIGHT ))
+    { 
+        if ( IsKeyPressed ( KEY_SPACE ) )
+        {
+            if ( jump < 1)
+            {
+                Falling = - 400.f;
+                ProtPositiony -= 100.f;
+                ProtPositionx -= xvelocity;
+                jump++;
+            }
+            else if ( jump == 1 )
+            {
+                Falling = - 400.f;
+                ProtPositiony -= 50.f;
+                jump++;
+            }  
+        }
+        else if ( IsKeyPressed ( KEY_S ))
+        {
+            Falling = 0.f;
+            ProtPositiony += 50.f;
+            ProtPositionx += 5.f;
+        }
+        else 
+        ProtPositionx -= xvelocity;
+    }
+    else if ( IsKeyDown ( KEY_D ) || IsKeyPressed ( KEY_LEFT ))
+    {
+        if ( IsKeyPressed ( KEY_SPACE ) )
+        {
+            if ( jump < 1)
+            {
+                Falling = - 400.f;
+                ProtPositiony -= 100.f;
+                ProtPositionx += xvelocity;
+                jump++;
+            }
+            else if ( jump == 1 )
+            {
+                Falling = - 400.f;
+                ProtPositiony -= 50.f;
+                jump++;
+            }   
+        }
+        else if ( IsKeyPressed ( KEY_S ))
+        {
+            Falling = 0.f;
+            ProtPositiony += 50.f;
+            ProtPositionx += 5.f;
+        }
+        else 
+        ProtPositionx += xvelocity;
+    }
+    else if ( IsKeyDown ( KEY_S ) || IsKeyPressed ( KEY_DOWN ))
+    {
+        ProtPositiony += (Falling * deltaT) + 20.f;   
+    }
+    else if ( IsKeyPressed ( KEY_W ) || IsKeyPressed ( KEY_SPACE ))
+    {
+        if ( jump < 1)
+        {
+            Falling = - 400.f;
+            ProtPositiony -= 100.f;
+            jump++;
+
+            if ( IsKeyPressed ( KEY_W ) || IsKeyPressed ( KEY_SPACE ))
+            {
+                ProtPositiony += Falling * deltaT - xvelocity;   
+            }
+        }
+        else if ( jump == 1 )
+        {
+            Falling = - 400.f;
+            ProtPositiony -= 50.f;
+            jump++;
+
+            if ( IsKeyPressed ( KEY_W ) || IsKeyPressed ( KEY_SPACE ))
+            {
+                ProtPositiony += Falling * deltaT + xvelocity;   
+            }
+        }
+        }      
+    }
+};
+
+The_Protagonist Protagonist;
+
+
 int Schermata = 0;
 int ExitGame = 0;
-float ProtPositionx = 500.f;
-float ProtPositiony = 300.f;
-
 float Gravity = 983.f;
 float Falling = 0.f;
+Vector2 mouse = GetMousePosition();
 
 void MenuConfirmExit ( int centerX, int centerY )
 {
@@ -22,8 +122,6 @@ void MenuConfirmExit ( int centerX, int centerY )
               BarConfermN = { centerX - xBarConfirm /2, centerY - yBarConfirm /-2 + 30, xBarConfirm, yBarConfirm };
     
     Color ExitBarColor = RED;
-
-    Vector2 mouse = GetMousePosition ();
 
     bool OntheExitBar = CheckCollisionPointRec ( mouse, BarConfermY );
 
@@ -109,8 +207,6 @@ void MenuExit ( float centerX, float centerY )
 
     Color ExitBarColor;
 
-    Vector2 mouse = GetMousePosition ();
-
     bool OntheExitBar = CheckCollisionPointRec ( mouse, ExitBar );
 
     if ( IsKeyPressed ( KEY_ESCAPE ) || Schermata == 0 )
@@ -133,6 +229,7 @@ void MenuExit ( float centerX, float centerY )
 
     BeginDrawing();
     
+    
     ClearBackground(BLACK);
     DrawRectangleRec( ExitMenu, GRAY );
     DrawText ( "Pause", centerX - xMenuExit /2 + 10, centerY - yMenuExit /2, 50, WHITE );
@@ -153,10 +250,9 @@ void InitialSchreeen ( float centerX, float centerY )
 
     Color menucolor = RED;
 
-    Vector2 mouse = GetMousePosition();
-
     bool PressedExit = true;
     bool Checkifontheblook = CheckCollisionPointRec ( mouse, menu );
+    
 
     if ( IsMouseButtonPressed ( MOUSE_LEFT_BUTTON ))
     {
@@ -174,6 +270,8 @@ void InitialSchreeen ( float centerX, float centerY )
 
     BeginDrawing();
 
+    
+
     ClearBackground( BLACK );
     DrawRectangleRec( menu, menucolor );
     DrawText ("NOME DEL GIOCO", centerX - xmenu /2, 100, 50, WHITE );
@@ -182,25 +280,58 @@ void InitialSchreeen ( float centerX, float centerY )
     EndDrawing ();
 }
 
-void GamePlay ( float centerX, float centerY, float high )
+void GamePlay ( float centerX, float centerY, float high, float lateral )
 {
     float ProtSizex = 100,
-        ProtSizey = 100;
-
-    static int jump = 0;
-    static float xvelocity;
+          ProtSizey = 100;
+    float ProtPositionx = 500.f;
+    float ProtPositiony = 300.f;
 
     Rectangle ExitofGame = { 0, 0, 100, 100 },
               Protagonist = { ProtPositionx, ProtPositiony, ProtSizex, ProtSizey },
               Enemy = { 400, 400, 400, 400 };
 
-    Vector2 mouse = GetMousePosition();
+
     Vector2 Themainbox = { ProtPositionx, ProtPositiony };
 
     float deltaT = GetFrameTime();
 
     xvelocity = 10.f;
 
+    bool onPlatform = (ProtPositionx >= 400 + ProtSizex && ProtPositionx <= 800 + ProtSizey);
+
+    float platformFloor = high - ProtSizey - 400;
+    float groundFloor = high - ProtSizey;
+    
+    if ( !onPlatform ){
+        if ( ProtPositiony >= groundFloor ){ 
+            ProtPositiony = groundFloor;
+            deltaT = 0;
+            jump = 0;
+        }
+        else {
+            Falling += Gravity * deltaT;
+            ProtPositiony += Falling * deltaT;
+        }
+    }
+    else if ( onPlatform ){
+        if ( ProtPositiony >= platformFloor ){
+            ProtPositiony = platformFloor; 
+            deltaT = 0;
+            jump = 0;
+        }
+        else{
+            Falling += Gravity * deltaT;
+            ProtPositiony += Falling + deltaT;
+        }
+
+        if ( ProtPositionx >= 400 && ProtPositionx <= 600 ){
+            ProtPositionx = 400;
+        }
+        else if (ProtPositionx >= 400 && ProtPositionx <= 600 ){
+            ProtPositionx = 800;
+        }
+    }   
     if ( IsMouseButtonPressed ( MOUSE_LEFT_BUTTON ))
     {
         if ( CheckCollisionPointRec ( mouse, ExitofGame ))
@@ -210,110 +341,14 @@ void GamePlay ( float centerX, float centerY, float high )
         }
     }
 
-    if ( ProtPositiony < high - ProtSizey )
-    {
-        Falling += Gravity * deltaT;
-        ProtPositiony += Falling * deltaT;   
-    }
-    else
-    {
-        ProtPositiony = high - ProtSizey;
-        deltaT = 0.f;
-        jump = 0;
-    }
-
-    if ( IsKeyDown ( KEY_A )|| IsKeyPressed ( KEY_RIGHT ))
-    { 
-        if ( IsKeyPressed ( KEY_SPACE ) )
-        {
-            if ( jump < 1)
-            {
-                Falling = - 400.f;
-                ProtPositiony -= 100.f;
-                ProtPositionx -= xvelocity;
-                jump++;
-            }
-            else if ( jump == 1 )
-            {
-                Falling = - 400.f;
-                ProtPositiony -= 50.f;
-                jump++;
-            }  
-        }
-        else if ( IsKeyPressed ( KEY_S ))
-        {
-            Falling = 0.f;
-            ProtPositiony += 50.f;
-            ProtPositionx += 5.f;
-        }
-        else 
-        ProtPositionx -= xvelocity;
-    }
-    else if ( IsKeyDown ( KEY_D ) || IsKeyPressed ( KEY_LEFT ))
-    {
-        if ( IsKeyPressed ( KEY_SPACE ) )
-        {
-            if ( jump < 1)
-            {
-                Falling = - 400.f;
-                ProtPositiony -= 100.f;
-                ProtPositionx += xvelocity;
-                jump++;
-            }
-            else if ( jump == 1 )
-            {
-                Falling = - 400.f;
-                ProtPositiony -= 50.f;
-                jump++;
-            }   
-        }
-        else if ( IsKeyPressed ( KEY_S ))
-        {
-            Falling = 0.f;
-            ProtPositiony += 50.f;
-            ProtPositionx += 5.f;
-        }
-        else 
-        ProtPositionx += xvelocity;
-    }
-    else if ( IsKeyDown ( KEY_S ) || IsKeyPressed ( KEY_DOWN ))
-    {
-        ProtPositiony += (Falling * deltaT) + 20.f;   
-    }
-    else if ( IsKeyPressed ( KEY_W ) || IsKeyPressed ( KEY_SPACE ))
-    {
-        if ( jump < 1)
-        {
-            Falling = - 400.f;
-            ProtPositiony -= 100.f;
-            jump++;
-
-            if ( IsKeyPressed ( KEY_W ) || IsKeyPressed ( KEY_SPACE ))
-            {
-                ProtPositiony += Falling * deltaT - xvelocity;   
-            }
-        }
-        else if ( jump == 1 )
-        {
-            Falling = - 400.f;
-            ProtPositiony -= 50.f;
-            jump++;
-
-            if ( IsKeyPressed ( KEY_W ) || IsKeyPressed ( KEY_SPACE ))
-            {
-                ProtPositiony += Falling * deltaT + xvelocity;   
-            }
-        }      
-    }
-
-    BeginDrawing ();
+        BeginDrawing ();
 
     ClearBackground ( Fade ( BLACK, 0.6f ) );
     DrawRectangleRec ( ExitofGame, RED );
     DrawRectangleRec ( Protagonist, WHITE );
-    DrawRectangleRec ( Enemy, YELLOW );
+//    DrawRectangleRec ( Enemy, YELLOW );
 
-    EndDrawing ();
+        EndDrawing ();
 }
 
 
@@ -355,8 +390,9 @@ int main ()
                     break;
                 
                 case 1:
-                    GamePlay ( centerX, centerY, high );
+                    GamePlay ( centerX, centerY, high, lateral );
                     break;
+
             }
         }
     }
