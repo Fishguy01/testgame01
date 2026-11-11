@@ -71,12 +71,30 @@ void GamePlay ( float centerX, float centerY, float high, float lateral, The_Pro
 
     bool hasHit;
 
-    Camera2D camera = { 0 };
-    camera.target = ( Vector2 ){ Camera.Positionx + ( Camera.Sizex /2.f ), Camera.Positiony };
-    camera.offset = ( Vector2 ){ GetScreenWidth() /2.f, GetScreenHeight() /2.f };
-    camera.rotation = 0.0f;
-    camera.zoom = 0.5f;
-    
+   Vector2 worldmouse = GetScreenToWorld2D ( mouse, Camera.camera );
+ 
+    if ( IsMouseButtonPressed ( MOUSE_BUTTON_MIDDLE ))
+    {
+        if (  CheckCollisionPointRec ( worldmouse, Drawenemy ))
+        {
+            Enemy.healtshow = true;
+            Enemy.follownow = true;
+            std:: cout << "LOCK IN" << std:: endl;
+        }
+        else {
+            Enemy.healtshow = false;
+            Enemy.follownow = false;
+        }
+    }
+ 
+    if ( Enemy.follownow == true ) {
+        Camera.EnemyFocus ( Protagonist, Enemy, deltaT );
+    }
+    else {
+        Camera.followProtagonist( Protagonist, deltaT );
+    }
+
+   
     if ( Protagonist.Positiony >= groundFloor ) {
         Protagonist.Positiony = groundFloor;
         Protagonist.deltaT = 0;
@@ -100,7 +118,7 @@ void GamePlay ( float centerX, float centerY, float high, float lateral, The_Pro
 
     if ( IsMouseButtonPressed ( MOUSE_LEFT_BUTTON ))
     {
-        if ( CheckCollisionPointRec ( mouse, ExitofGame ))
+        if ( CheckCollisionPointRec( mouse, ExitofGame ))
         {
             Exit = ExitState::MenuExit;   
             return;
@@ -109,20 +127,20 @@ void GamePlay ( float centerX, float centerY, float high, float lateral, The_Pro
 
     Protagonist.Update( deltaT );    
 
-    Camera.followProtagonist( Protagonist, deltaT );
+    Enemy.Update ( Protagonist, deltaT );
 
         // use in case for debbugin
         //std:: cout << Protagonist.AttackDamage() << std::endl;
     //Enemy
     
-    if ( Enemy.health <= 10 ) {
+    if ( Enemy.healthcurrent <= 10 ) {
         Enemy.Sizey = 0.f;
         Enemy.Sizex = 0.f;
     }
 
     if ( Protagonist.IsAttacking() && hasHit == false && CheckCollisionRecs ( Protagonist.HitBoxofAttack(), Drawenemy )) {
         Enemy.stuntime = 0;
-        Enemy.health -= Protagonist.AttackDamage();
+        Enemy.healthcurrent -= Protagonist.AttackDamage();
         std:: cout << Protagonist.AttackDamage() << std::endl;
         hasHit = true;
     }
@@ -133,22 +151,27 @@ void GamePlay ( float centerX, float centerY, float high, float lateral, The_Pro
     
     const AttackData test = Protagonist.AttackTable.at ( Protagonist.currentAttack);
 
-    if ( IsKeyPressed ( KEY_B )) {
-        Protagonist.SelectAttack ( AttackType :: lAttack );
-        hasHit = false;
-    }
-   
-    if ( IsKeyPressed ( KEY_N )) {
-        Protagonist.SelectAttack ( AttackType :: HAttack );
-        hasHit = false;
-    }
-
-    if ( IsKeyPressed ( KEY_B ) && IsKeyPressed ( KEY_LEFT_SHIFT ) ) {
+    if ( IsMouseButtonPressed ( MOUSE_BUTTON_LEFT ) && IsKeyDown ( KEY_LEFT_SHIFT ) ) {
         Protagonist.SelectAttack ( AttackType :: MovlAttack );
         hasHit = false; 
     }
 
+    if ( IsMouseButtonPressed ( MOUSE_BUTTON_RIGHT ) && IsKeyDown ( KEY_LEFT_SHIFT ) ) {
+        Protagonist.SelectAttack ( AttackType :: MovHAttack );
+        hasHit = false; 
+    }
 
+    if ( IsMouseButtonPressed ( MOUSE_BUTTON_LEFT ) ) {
+        Protagonist.SelectAttack ( AttackType :: lAttack );
+        hasHit = false;
+    }
+   
+    if ( IsMouseButtonPressed ( MOUSE_BUTTON_RIGHT )) {
+        Protagonist.SelectAttack ( AttackType :: HAttack );
+        hasHit = false;
+    }
+
+   
     Protagonist.StartAttack ();
     
 
@@ -156,7 +179,7 @@ void GamePlay ( float centerX, float centerY, float high, float lateral, The_Pro
     
     ClearBackground ( Fade ( BLACK, 0.6f ) );
 
-        BeginMode2D ( camera );
+        BeginMode2D ( Camera.camera );
 
     DrawRectangleRec ( DrawProtagonist , WHITE );
     if ( Protagonist.IsHitBoxesActive () ){
@@ -164,7 +187,6 @@ void GamePlay ( float centerX, float centerY, float high, float lateral, The_Pro
     }
 
 
-    DrawRectangle ( Camera.Positionx, Camera.Positiony, Camera.Sizex, Camera.Sizey, BLUE ); //Camera
     DrawLine( -10000, groundFloor + Protagonist.Sizey, 100000, groundFloor + Protagonist.Sizey,  LIGHTGRAY );
 
 
@@ -172,6 +194,10 @@ void GamePlay ( float centerX, float centerY, float high, float lateral, The_Pro
 
         EndMode2D ();
 
+
+    if ( Enemy.healtshow == true ){
+        DrawRectangleRec ( Enemy.HealthBar(), RED );
+    }
 
     DrawRectangleRec ( ExitofGame, RED );
         EndDrawing ();

@@ -16,8 +16,8 @@ struct AttackData {
     int active;
     int recovery;
     Rectangle hitboxOffset;
-    float chargespeed;
     int Damage; 
+    float chargespeed;
 };
 
 struct The_Protagonist {
@@ -110,9 +110,10 @@ struct The_Protagonist {
 
 
     const std:: unordered_map < AttackType, AttackData > AttackTable {
-        { AttackType::lAttack, { 4, 7, 3, { -70, 25, 70, 25 }, 5, 5 }},
-        { AttackType::HAttack, { 8, 9, 5, { -50, 20, 70, 40 }, 10, 15 }},
-        { AttackType::MovlAttack, { 1, 5, 4, { -90, 35, 90, 35 }, 7, 30 }},
+        { AttackType::lAttack,      { 4, 7, 3, { -70, 25, 70, 25 }, 5, 5 }},
+        { AttackType::HAttack,      { 8, 9, 5, { -50, 20, 70, 40 }, 10, 15 }},
+        { AttackType::MovlAttack,   { 1, 5, 4, { -90, 35, 90, 35 }, 7, 0.7 }},
+        { AttackType::MovHAttack,   { 4, 7, 7, { -90, 50, 90, 50 }, 25, 0.5 }},
 
         { AttackType::None, { 0, 0, 0, { 0 }, 0 }}
 

@@ -1,4 +1,5 @@
 #include <raylib.h>
+#include <cmath>
 #include <ctime>
 #include <iostream> 
 #include "src/Gamestate.h"
